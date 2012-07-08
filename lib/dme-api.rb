@@ -22,9 +22,7 @@ class DME
     response = RestClient.get(get_url(), get_headers())
 
     # Return all the domain records
-    if name.nil? then
-      return JSON.parse(response)
-    end
+    if name.nil? { return JSON.parse(response) }
 
     # find the record we want
     JSON.parse(response.to_str).select { |x| x["name"] == name }.first
