@@ -18,30 +18,18 @@ class DME
     @domain = domain
   end
 
-  # get the DNS record for the given hostname
-  def get(name)
+  def get(name=nil)
     response = RestClient.get(get_url(), get_headers())
+
+    # Return all the domain records
+    if name.nil? then
+      return JSON.parse(response)
+    end
 
     # find the record we want
     JSON.parse(response.to_str).select { |x| x["name"] == name }.first
   end
 
-  # create a new DNS record
-  #
-  # record should be a hash with the following values:
-  #
-  # { "name"        => hostname,
-  #   "type"        => "CNAME",
-  #   "data"        => publicname,
-  #   "gtdLocation" => "DEFAULT",
-  #   "ttl"         => 300 }
-  #
-  # name = hostname
-  # data = host/IP it should resolve to
-  #
-  # e.g., for type="CNAME": name="www", data="web01.domain.com.",
-  #                         or data="web01" for short
-  #
   def create(record)
     response = RestClient.post get_url(),
                             record.to_json,
@@ -49,12 +37,15 @@ class DME
     JSON.parse(response)
   end
 
-  # delete the DNS record with the given id. id can be retrieved by
-  # first calling get()
   def delete(id)
     response = RestClient.delete get_url(id), get_headers()
   end
 
+  def update(id,record)
+    response = RestClient.put get_url(id),
+                            record.to_json,
+                            get_headers(:"content-type" => :json)
+  end
 
   private
 
